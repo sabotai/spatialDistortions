@@ -3,12 +3,13 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-	ofSetLogLevel(OF_LOG_VERBOSE);
+	//ofSetLogLevel(OF_LOG_VERBOSE);
 
 	    // Setup post-processing chain
+
     post.init(ofGetWidth(), ofGetHeight());
+    /*
     post.createPass<FxaaPass>()->setEnabled(false);
-    post.createPass<BloomPass>()->setEnabled(true);
     post.createPass<DofPass>()->setEnabled(false);
     post.createPass<KaleidoscopePass>()->setEnabled(false);
     post.createPass<NoiseWarpPass>()->setEnabled(false);
@@ -17,14 +18,10 @@ void ofApp::setup() {
     post.createPass<VerticalTiltShifPass>()->setEnabled(false);
     post.createPass<GodRaysPass>()->setEnabled(false);
     post.createPass<ZoomBlurPass>()->setEnabled(false);
-
-
-
+    */
+    post.createPass<BloomPass>()->setEnabled(true);
+    //post.createPass<RGBShiftPass>()->setEnabled(true);
     post.createPass<RGBShiftPass>()->setAngle(329.f); //330 is nothing
-
-    //post.createPass<RGBShiftPass>()->setEnabled(false);->setEnabled(false);
-
-    post.createPass<RGBShiftPass>()->setEnabled(true);
 
 	// enable depth->video image calibration
 	kinect.setRegistration(true);
@@ -57,8 +54,9 @@ void ofApp::setup() {
 */
 	nearThreshold = 0;
 	farThreshold = 1000;
+	colorThreshold = farThreshold / 2;
 
-	ofSetFrameRate(60);
+	//ofSetFrameRate(60);
 
 	// zero the tilt on startup
 	angle = 0;
@@ -81,14 +79,62 @@ void ofApp::setup() {
 */
     resolution = 2;
     grid = true;
+
+    //ofSetBackgroundAuto(false);
+    scaleAmt = 1.0;
+
+
+	//threadedObject.start();
+
+
+
+	//store the kinect width and height for convenience
+	int width = 640;
+	int height = 480;
+
+    frameBlend = 40;
+
+/*
+	//add one vertex to the mesh for each pixel
+	for (int y = 0; y < height; y++){
+		for (int x = 0; x<width; x++){
+			mainMesh.addVertex(ofPoint(x,y,0));	// mesh index = x + y*width
+												// this replicates the pixel array within the camera bitmap...
+			mainMesh.addColor(ofFloatColor(0,0,0));  // placeholder for colour data, we'll get this from the camera
+		}
+	}
+
+	for (int y = 0; y<height-1; y++){
+		for (int x=0; x<width-1; x++){
+			mainMesh.addIndex(x+y*width);				// 0
+			mainMesh.addIndex((x+1)+y*width);			// 1
+			mainMesh.addIndex(x+(y+1)*width);			// 10
+
+			mainMesh.addIndex((x+1)+y*width);			// 1
+			mainMesh.addIndex((x+1)+(y+1)*width);		// 11
+			mainMesh.addIndex(x+(y+1)*width);			// 10
+		}
+	}
+	*/
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
     ofSetWindowTitle(ofToString(nearThreshold) + " Near / " + ofToString(farThreshold) + " Far / " + ofToString(ofGetFrameRate()) + " FPS");
 
-	ofBackground(0, 0, 0);
 
+
+    ofBackground(0);
+
+
+
+
+/*
+ofSetColor(0,0,0, 5);
+ofRect(0,0,ofGetWidth(), ofGetHeight());
+
+ofSetColor(0,0,0);
+*/
 	kinect.update();
 
 
@@ -139,6 +185,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
+
     //triangulation.reset();
 		    // copy enable part of gl state
     glPushAttrib(GL_ENABLE_BIT);
@@ -148,15 +195,24 @@ void ofApp::draw() {
     glEnable(GL_CULL_FACE);
     //light.enable();
 	//ofSetDepthTest(true);
-	ofDisableDepthTest();
+	//ofDisableDepthTest();
+
+    ofScale(scaleAmt, scaleAmt); //resize the screen if switching between fullscreen
+    //cout<< scaleAmt << endl;
+
     if (showSnow){
         snow();
     }
+
+
+
     // begin scene to post process
-    ofEnableDepthTest();
+    //ofEnableDepthTest();
     post.begin(easyCam);
 
-    if (grid){
+	ofSetColor(255, 255, 255);
+
+    if (grid){ //draw the grid plane below the point cloud
         ofPushMatrix();
             // the projected points are 'upside down' and 'backwards'
             ofTranslate(0,-800, 0);
@@ -167,18 +223,12 @@ void ofApp::draw() {
         //ofDrawAxis(1000.f);
     }
 
-//oldTv.begin();
 
-	//ofScale(2,2);
-	ofSetColor(255, 255, 255);
-
-    //easyCam.begin();
     drawPointCloud();
-    //easyCam.end();
 
 
     ofNoFill();
-    triangulation.draw();
+    //triangulation.draw(); //draw those random floating triangulations
 
     post.end();    // end scene and draw
 
@@ -189,103 +239,160 @@ void ofApp::draw() {
     glPopAttrib();    // set gl state back to original
 
 
+
+
     ofDrawBitmapString(ofToString(easyCam.getDrag()), 20, 652);
     //oldTv.end();
     //oldTv.update();
     //oldTv.draw();
+
+}
+
+void ofApp::drawPointCloudAlt(){
+/*
+	int w = 640;
+	int h = 480;
+
+		for (int i=0; i< w * h; i++){
+
+			//now we get the vertex aat this position
+			//we extrude the mesh based on it's brightness
+			ofVec3f tmpVec = mainMesh.getVertex(i);
+			tmpVec.z = sampleColor.getBrightness() * extrusionAmount;
+			mainMesh.setVertex(i, tmpVec);
+
+			mainMesh.setColor(i, sampleColor);
+		}
+*/
 }
 
 void ofApp::drawPointCloud() {
 	int w = 640;
 	int h = 480;
-	ofMesh mesh;
 
 
 	ofSetLineWidth(3);
-	mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+
+	if (ofGetFrameNum()%frameBlend ==0){
+
+mesh.clear();}
+//mainMesh.clearIndices();
+
 
 	for(int y = 0; y < h; y += resolution) {
 		for(int x = 0; x < w; x += resolution) {
 			if((kinect.getDistanceAt(x, y) > nearThreshold) && (kinect.getDistanceAt(x, y) < farThreshold)) {
 
+/*
+        //temp attempt to reduce the indices
+                    mainMesh.addIndex(x+y*w);				// 0
+                    mainMesh.addIndex((x+1)+y*w);			// 1
+                    mainMesh.addIndex(x+(y+1)*w);			// 10
+
+                    mainMesh.addIndex((x+1)+y*w);			// 1
+                    mainMesh.addIndex((x+1)+(y+1)*w);		// 11
+                    mainMesh.addIndex(x+(y+1)*w);			// 10
+                    //
+*/
+
+                        int blend = 255  / (ofGetFrameRate() / frameBlend);
+
                 if (!showColor){
-                    if (kinect.getDistanceAt(x,y) < farThreshold / 2){
-                        mesh.addColor(kinect.getColorAt(x,y));
+                    if (kinect.getDistanceAt(x,y) > colorThreshold){
+
+                        ofColor tempC(kinect.getColorAt(x,y));
+                        tempC.a = blend;
+                        mesh.addColor(tempC);
+                        //mesh.addColor(kinect.getColorAt(x,y));
+
+                        //mainMesh.setColor(x*y, kinect.getColorAt(x,y));
                         mesh.setMode(OF_PRIMITIVE_POINTS);
                     } else {
                         mesh.addColor(ofColor(ofRandom(0,220)));
+
+                        //mainMesh.setColor(x*y, ofRandom(0,220));
                         mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
                     }
 
-                 } else {
-                    /*if (kinect.getDistanceAt(x,y) < farThreshold / 2){
-                        mesh.setMode(OF_PRIMITIVE_POINTS);
-                    } else {
-                        mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
-                    }*/
-                        mesh.addColor(ofColor(255,20,20));
+                 } else { //show red version
+
+                        //ofColor rota(255,20,20);
+                        mesh.addColor(ofColor(255,20,20, blend));
+                        //mesh.addColor(rota);
+
+                        //mainMesh.setColor()
+
+                        //mainMesh.setColor(x*y, ofColor(255,20,20));
                 }
                 if (drawPoint){
-
                         mesh.setMode(OF_PRIMITIVE_POINTS);
                 } else {
-
                         mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
                 }
 
 				mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
 
+                //mainMesh.setVertex((x*y), kinect.getWorldCoordinateAt(x,y));
+				//path.lineTo(kinect.getWorldCoordinateAt(x,y));
+				//poly.addVertex(kinect.getWorldCoordinateAt(x,y));
+
                 //triangulation.addPoint(kinect.getWorldCoordinateAt(x,y));
+			} else {
 
-
+                        //otherMesh.addColor(kinect.getColorAt(x,y));
+				//otherMesh.addVertex(ofPoint(x, y, 5000));
 			}
 		}
 	}
-	glPointSize(5);
+
+
+	//}
+	glPointSize(10);
 	ofPushMatrix();
 	// the projected points are 'upside down' and 'backwards'
-	ofScale(1, -1, -1);
+	ofScale(1, -1, -1); //flip it back around
+
+
+
+	//    otherMesh.drawVertices();
 	ofTranslate(0, 0, -1800); // center the points a bit
-
-   // dir.enable();
-
-	mesh.drawVertices();
-	//mesh.draw();
-	//ofDisableDepthTest();
-
-   // mVboBox = mesh;//.getMeshForIndices();
-
-	//mVboBox.draw();
-
-    //vbo.setMesh(mesh, GL_STATIC_DRAW);
-
-    //vbo.draw(GL_QUADS,0,24);
-
+    //mainMesh.setMode(OF_PRIMITIVE_TRIANGLES);
+    //mainMesh.drawFaces();
+    //mesh.drawVertices();
+    mesh.drawFaces();
 	ofPopMatrix();
 }
 
 
 void ofApp::snow(){
-    ofSetLineWidth(5);
+	//threadedObject.draw();
+
     int noisePixel = 5;
     //ofLine(0,0,500,500);
 
     for (int yy = 0; yy < ofGetHeight() / noisePixel; yy++) {
       for (int xx = 0; xx < ofGetWidth() / noisePixel; xx++) {
-        float noiseScale = 5 * ofGetFrameNum();
+        //float noiseScale = 5 * ofGetFrameNum();
 
-        float noiseVal = ofNoise(ofRandom(0,ofGetWidth())*noiseScale, ofRandom(0,ofGetHeight())*noiseScale);
-        ofSetColor(noiseVal*255);
+        //float noiseVal = ofNoise(ofRandom(0,ofGetWidth())*noiseScale, ofRandom(0,ofGetHeight())*noiseScale);
+        //ofSetColor(noiseVal*255);
+
+        int alphaAmt = 200;
+        ofSetColor(ofRandom(0,255), ofRandom(alphaAmt, 255));
 
         ofSetLineWidth(noisePixel);
-        ofLine(xx*noisePixel, yy*noisePixel, xx*noisePixel+noisePixel, yy*noisePixel+ofRandom(0,noisePixel));
+        //ofLine(xx*noisePixel, yy*noisePixel, xx*noisePixel+noisePixel, yy*noisePixel+ofRandom(0,noisePixel));
+        otherMesh.addColor(ofColor(ofRandom(0,255)));
+        otherMesh.addVertex(ofPoint(xx,yy));
       }
     }
+
+
 
 }
 //--------------------------------------------------------------
 void ofApp::exit() {
-	kinect.setCameraTiltAngle(0); // zero the tilt on exit
+	//kinect.setCameraTiltAngle(0); // zero the tilt on exit
 	kinect.close();
 
 #ifdef USE_TWO_KINECTS
@@ -335,6 +442,16 @@ void ofApp::keyPressed (int key) {
 			if (farThreshold < 0) farThreshold = 0;
 			break;
 
+		case '[':
+			colorThreshold += jump;
+			if (colorThreshold > farThreshold) colorThreshold = farThreshold;
+			break;
+
+		case ']':
+			colorThreshold -= jump;
+			if (colorThreshold < 0) colorThreshold = 0;
+			break;
+
 		case '+':
 		case '=':
 			nearThreshold += jump;
@@ -362,6 +479,11 @@ void ofApp::keyPressed (int key) {
 			*/
 			showColor = !showColor;
 			break;
+		case 'f':
+            scaleAmt = float(ofGetScreenWidth()) / float(ofGetWidth());
+			ofToggleFullscreen();
+			break;
+
 		case 'w':
 			showSnow = !showSnow;
 			break;
@@ -461,15 +583,15 @@ void ofApp::mousePressed(int x, int y, int button)
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button)
 {
-triangulation.addPoint(ofPoint(x,y, -1 * easyCam.getDistance()));
-            triangulation.triangulate();
+            //triangulation.addPoint(ofPoint(x,y, -1 * easyCam.getDistance()));
+            //triangulation.triangulate();
             }
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h)
 {}
 
-
+/*
 void ofApp::setLightOri(ofLight &light, ofVec3f rot)
 {
     ofVec3f xax(1, 0, 0);
@@ -479,3 +601,4 @@ void ofApp::setLightOri(ofLight &light, ofVec3f rot)
     q.makeRotate(rot.x, xax, rot.y, yax, rot.z, zax);
     light.setOrientation(q);
 }
+*/

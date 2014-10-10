@@ -6,6 +6,7 @@
 #include "ofxPostProcessing.h"
 #include "ofxOldTv.h"
 #include "ofxDelaunay.h"
+#include "threadedObject.h"
 
 // Windows users:
 // You MUST install the libfreenect kinect drivers in order to be able to use
@@ -35,13 +36,14 @@ public:
 	void snow();
 
 	void drawPointCloud();
+	void drawPointCloudAlt();
 
 	void keyPressed(int key);
 	void mouseDragged(int x, int y, int button);
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
 	void windowResized(int w, int h);
-    void setLightOri(ofLight &light, ofVec3f rot);
+    //void setLightOri(ofLight &light, ofVec3f rot);
 	ofxKinect kinect;
 
 #ifdef USE_TWO_KINECTS
@@ -65,6 +67,7 @@ public:
 
 	int nearThreshold;
 	int farThreshold;
+	int colorThreshold;
 	int resolution;
 
 	int angle;
@@ -78,16 +81,32 @@ public:
 
     ofImage myImage;
 
+/*
     ofVboMesh	mVboBox;
     ofVbo vbo;
+    ofPath path;
+    ofPolyline poly;
 
     ofxOldTv oldTv;
+    ofLight dir;
+    ofVec3f dir_rot;
+
+    */
         ofxDelaunay triangulation;
 
     bool fxaa, bloom, dof, kaleidoscope, noisewarp, pix, edge, tilt, god, rgbpass, zoom;
 
-    ofLight dir;
-    ofVec3f dir_rot;
 
     bool showColor, drawPoint, grid;
+
+    float scaleAmt;
+
+
+	ofMesh mesh, otherMesh, mainMesh;
+
+
+    ThreadedObject threadedObject;
+        ///< \brief Our threaded object.
+
+        int frameBlend;
 };
