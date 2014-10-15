@@ -20,7 +20,7 @@ void ofApp::setup() {
     post.createPass<ZoomBlurPass>()->setEnabled(false);
     */
     post.createPass<BloomPass>()->setEnabled(true);
-    //post.createPass<RGBShiftPass>()->setEnabled(true);
+    post.createPass<RGBShiftPass>()->setEnabled(true);
     post.createPass<RGBShiftPass>()->setAngle(329.f); //330 is nothing
 
 	// enable depth->video image calibration
@@ -53,7 +53,7 @@ void ofApp::setup() {
 	grayThreshFar.allocate(kinect.width, kinect.height);
 */
 	nearThreshold = 0;
-	farThreshold = 1000;
+	farThreshold = 5000;
 	colorThreshold = farThreshold / 2;
 
 	//ofSetFrameRate(60);
@@ -77,7 +77,7 @@ void ofApp::setup() {
     dir_rot = ofVec3f(0, -95, 0);
     setLightOri(dir, dir_rot);
 */
-    resolution = 2;
+    resolution = 3;
     grid = true;
 
     //ofSetBackgroundAuto(false);
@@ -92,9 +92,12 @@ void ofApp::setup() {
 	int width = 640;
 	int height = 480;
 
-    frameBlend = 40;
+    frameBlend = 1;
 
-/*
+    oldComp = 0;
+    compAverage = 0;
+
+
 	//add one vertex to the mesh for each pixel
 	for (int y = 0; y < height; y++){
 		for (int x = 0; x<width; x++){
@@ -103,7 +106,23 @@ void ofApp::setup() {
 			mainMesh.addColor(ofFloatColor(0,0,0));  // placeholder for colour data, we'll get this from the camera
 		}
 	}
-
+/*
+    float connectionDistance = 100;
+    int numVerts = mainMesh.getNumVertices();
+    for (int a=0; a<numVerts; ++a) {
+        ofVec3f verta = mainMesh.getVertex(a);
+        for (int b=a+1; b<numVerts; ++b) {
+            ofVec3f vertb = mainMesh.getVertex(b);
+            float distance = verta.distance(vertb);
+            if (distance <= connectionDistance) {
+                mainMesh.addIndex(a);
+                mainMesh.addIndex(b);
+            }
+        }
+    }
+    */
+    //cout << "clear" << endl;
+/*
 	for (int y = 0; y<height-1; y++){
 		for (int x=0; x<width-1; x++){
 			mainMesh.addIndex(x+y*width);				// 0
@@ -128,6 +147,7 @@ void ofApp::update() {
 
 
 
+				kinect.update();
 
 /*
 ofSetColor(0,0,0, 5);
@@ -135,7 +155,7 @@ ofRect(0,0,ofGetWidth(), ofGetHeight());
 
 ofSetColor(0,0,0);
 */
-	kinect.update();
+	//kinect.update();
 
 
 /*
@@ -189,13 +209,9 @@ void ofApp::draw() {
     //triangulation.reset();
 		    // copy enable part of gl state
     glPushAttrib(GL_ENABLE_BIT);
-
     // setup gl state
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    //light.enable();
-	//ofSetDepthTest(true);
-	//ofDisableDepthTest();
 
     ofScale(scaleAmt, scaleAmt); //resize the screen if switching between fullscreen
     //cout<< scaleAmt << endl;
@@ -216,11 +232,9 @@ void ofApp::draw() {
         ofPushMatrix();
             // the projected points are 'upside down' and 'backwards'
             ofTranslate(0,-800, 0);
-            //ofRotateY(-30);
             ofRotateZ(90);
             ofDrawGridPlane(20000.f, 48.f, false);
         ofPopMatrix();
-        //ofDrawAxis(1000.f);
     }
 
 
@@ -270,84 +284,194 @@ void ofApp::drawPointCloud() {
 	int w = 640;
 	int h = 480;
 
+	float tempCompAverage;
+
+
+    //ofMesh oldMesh;
+    //oldMesh = mesh;
+    ofMesh mesh;
+
+    //mesh.clear();
+    //mainMesh.clearVertices();
+
 
 	ofSetLineWidth(3);
 
+/*
 	if (ofGetFrameNum()%frameBlend ==0){
 
-mesh.clear();}
-//mainMesh.clearIndices();
+        //mesh.clear();
+    }
+  */
+                int blend;
 
+                if (frameBlend > 1){
+                    blend = 255  / (frameBlend / ofGetFrameRate());
+                    blend = ofClamp(blend, 0, 255);
+                    //cout << blend << endl;
+                } else {
+                    blend = 255;
+                }
 
 	for(int y = 0; y < h; y += resolution) {
 		for(int x = 0; x < w; x += resolution) {
+
+
 			if((kinect.getDistanceAt(x, y) > nearThreshold) && (kinect.getDistanceAt(x, y) < farThreshold)) {
 
-/*
-        //temp attempt to reduce the indices
-                    mainMesh.addIndex(x+y*w);				// 0
-                    mainMesh.addIndex((x+1)+y*w);			// 1
-                    mainMesh.addIndex(x+(y+1)*w);			// 10
 
-                    mainMesh.addIndex((x+1)+y*w);			// 1
-                    mainMesh.addIndex((x+1)+(y+1)*w);		// 11
-                    mainMesh.addIndex(x+(y+1)*w);			// 10
-                    //
-*/
-
-                        int blend = 255  / (ofGetFrameRate() / frameBlend);
 
                 if (!showColor){
                     if (kinect.getDistanceAt(x,y) > colorThreshold){
 
-                        ofColor tempC(kinect.getColorAt(x,y));
+
+                        tempC = ofColor((kinect.getColorAt(x,y)));
                         tempC.a = blend;
                         mesh.addColor(tempC);
                         //mesh.addColor(kinect.getColorAt(x,y));
 
-                        //mainMesh.setColor(x*y, kinect.getColorAt(x,y));
+                        //mainMesh.setColor(x+y * w, kinect.getColorAt(x,y));
                         mesh.setMode(OF_PRIMITIVE_POINTS);
                     } else {
                         mesh.addColor(ofColor(ofRandom(0,220)));
 
-                        //mainMesh.setColor(x*y, ofRandom(0,220));
+                        //mainMesh.setColor(x+y * w, ofRandom(0,220));
                         mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
                     }
 
                  } else { //show red version
 
                         //ofColor rota(255,20,20);
-                        mesh.addColor(ofColor(255,20,20, blend));
+                        mesh.addColor(ofColor(255,20,20));//, blend));
                         //mesh.addColor(rota);
 
                         //mainMesh.setColor()
 
-                        //mainMesh.setColor(x*y, ofColor(255,20,20));
+                        //mainMesh.setColor(x+y * w, ofColor(255,20,20));
                 }
                 if (drawPoint){
-                        mesh.setMode(OF_PRIMITIVE_POINTS);
+                        //mesh.setMode(OF_PRIMITIVE_POINTS);
                 } else {
-                        mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+                        //mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
                 }
 
 				mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
 
-                //mainMesh.setVertex((x*y), kinect.getWorldCoordinateAt(x,y));
+                //mainMesh.setVertex((x+y * w), kinect.getWorldCoordinateAt(x,y));
 				//path.lineTo(kinect.getWorldCoordinateAt(x,y));
 				//poly.addVertex(kinect.getWorldCoordinateAt(x,y));
 
                 //triangulation.addPoint(kinect.getWorldCoordinateAt(x,y));
 			} else {
 
+                        //otherMesh.addColor(ofColor(255,20,20));//, blend));
                         //otherMesh.addColor(kinect.getColorAt(x,y));
-				//otherMesh.addVertex(ofPoint(x, y, 5000));
+				//otherMesh.addVertex(kinect.getWorldCoordinateAt(x, y));
 			}
+
+/*
+            if (x < oldMesh.getNumVertices() - 1){
+                float connectionDistance = 30;
+
+                int a = x;
+                int b = x+1;
+
+                ofVec3f verta = oldMesh.getVertex(a);
+                ofVec3f vertb = oldMesh.getVertex(b);
+                float distance = verta.distance(vertb);
+                if (distance <= connectionDistance) {
+                    oldMesh.addIndex(a);
+                    oldMesh.addIndex(b);
+                    }
+            }
+*/
+        //if these pixels change in depth more than the threshold, record their average movement to adjust the camera
+
+        float comp = kinect.getDistanceAt(x,y) - lastCoord[x+y*w];
+        int compThresh = 100 / resolution;
+
+        //if (comp > compThresh){
+            tempCompAverage += comp;
+            compCount +=1;
+        //}
+        lastCoord[x+y*w] = kinect.getDistanceAt(x, y);
+        //cout << lastCoord[x+y*w] << endl;
+
 		}
 	}
 
+    int compMin = 2000 / resolution; //number of points needed to even compare them
+    compFrameCount++;
+
+    if(compCount > compMin){
+        tempCompAverage = tempCompAverage / compCount;
+    } else {
+        tempCompAverage = 0;
+    }
+
+    float transAmt = 0;
+
+    if (compFrameCount < ofGetFrameRate()/2){ //every half second
+        compAverage += tempCompAverage;
+        transAmt = oldComp;
+
+    } else {
+        compAverage /= compFrameCount;
+
+        //compLerp = ofLerp(compLerp, compAverage + oldComp, 0.5);
+        //float lerpedComp = ofLerp(oldComp, compAverage, 0.5);
+        //compLerp = lerpedComp+1;
+        transAmt = oldComp;
+
+        cout<< "compAvg is " << compAverage << "  and oldComp is " << oldComp <<  " and lerped is " << compLerp << endl;
+        //compAverage = oldComp;
+        //compAverage *= 100; //multiplier for distance changes
+        if (compAverage >= -10000000){
+            oldComp += compAverage;}
+        compAverage = 0;
+        compFrameCount = 0;
+    }
+
+    //cout<< "transamt is " << transAmt << endl;
+        ofTranslate(0, 0, transAmt * 40); // move the camera by the lerped average change in depth above a threshold
+
+
+    tempCompAverage = 0;
+    compCount = 0;
+    //compAverage = 0;
+
+    if (collectIndices){
+            // Don't forget to change to lines mode!
+        mesh.setMode(OF_PRIMITIVE_TRIANGLES);
+
+        // ...
+        // Omitting the code for creating vertices for clarity
+        // but don't erase it from your file!
+
+        // Let's add some lines!
+            float connectionDistance = 200;
+            //mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+            int numVerts = mesh.getNumVertices();
+            for (int a=0; a<numVerts; ++a) {
+                ofVec3f verta = mesh.getVertex(a);
+                for (int b=a+1; b<numVerts; ++b) {
+                    ofVec3f vertb = mesh.getVertex(b);
+                    float distance = verta.distance(vertb);
+                        if (distance <= connectionDistance) {
+                            mesh.addIndex(a);
+                            mesh.addIndex(b);
+                        }
+                    }
+
+
+
+            }
+
+            }
+
 
 	//}
-	glPointSize(10);
+	glPointSize(5);
 	ofPushMatrix();
 	// the projected points are 'upside down' and 'backwards'
 	ofScale(1, -1, -1); //flip it back around
@@ -356,10 +480,15 @@ mesh.clear();}
 
 	//    otherMesh.drawVertices();
 	ofTranslate(0, 0, -1800); // center the points a bit
-    //mainMesh.setMode(OF_PRIMITIVE_TRIANGLES);
     //mainMesh.drawFaces();
     //mesh.drawVertices();
-    mesh.drawFaces();
+    mesh.draw();
+
+
+
+    otherMesh.setMode(OF_PRIMITIVE_POINTS);
+    //otherMesh.draw();
+    //oldMesh.drawFaces();
 	ofPopMatrix();
 }
 
@@ -381,9 +510,9 @@ void ofApp::snow(){
         ofSetColor(ofRandom(0,255), ofRandom(alphaAmt, 255));
 
         ofSetLineWidth(noisePixel);
-        //ofLine(xx*noisePixel, yy*noisePixel, xx*noisePixel+noisePixel, yy*noisePixel+ofRandom(0,noisePixel));
-        otherMesh.addColor(ofColor(ofRandom(0,255)));
-        otherMesh.addVertex(ofPoint(xx,yy));
+        ofLine(xx*noisePixel, yy*noisePixel, xx*noisePixel+noisePixel, yy*noisePixel+ofRandom(0,noisePixel));
+        //otherMesh.addColor(ofColor(ofRandom(0,255)));
+        //otherMesh.addVertex(ofPoint(xx,yy));
       }
     }
 
@@ -405,11 +534,11 @@ void ofApp::keyPressed (int key) {
 
 
 	switch (key) {
-	/*
+
 		case ' ':
-			bThreshWithOpenCV = !bThreshWithOpenCV;
+            collectIndices = !collectIndices;
 			break;
-*/
+
 		case'p':
 			drawPoint = !drawPoint;
 			break;
@@ -455,7 +584,7 @@ void ofApp::keyPressed (int key) {
 		case '+':
 		case '=':
 			nearThreshold += jump;
-			if (nearThreshold > 5000) nearThreshold = 5000;
+			if (nearThreshold > 10000) nearThreshold = 10000;
 			break;
 
 		case '-':

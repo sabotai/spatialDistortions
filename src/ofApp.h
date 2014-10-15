@@ -97,7 +97,7 @@ public:
     bool fxaa, bloom, dof, kaleidoscope, noisewarp, pix, edge, tilt, god, rgbpass, zoom;
 
 
-    bool showColor, drawPoint, grid;
+    bool showColor, drawPoint, grid, collectIndices;
 
     float scaleAmt;
 
@@ -109,4 +109,10 @@ public:
         ///< \brief Our threaded object.
 
         int frameBlend;
+        ofColor tempC;
+        float lastCoord [640 * 480]; //save the last depth for comparison
+        float compCount, compFrameCount;
+        float compAverage, oldComp;
+
+    float compLerp;
 };
