@@ -20,8 +20,8 @@ void ofApp::setup() {
     post.createPass<ZoomBlurPass>()->setEnabled(false);
     */
     post.createPass<BloomPass>()->setEnabled(true);
-    post.createPass<RGBShiftPass>()->setEnabled(true);
-    post.createPass<RGBShiftPass>()->setAngle(329.f); //330 is nothing
+    //post.createPass<RGBShiftPass>()->setEnabled(true);
+    //post.createPass<RGBShiftPass>()->setAngle(329.f); //330 is nothing
 
 	// enable depth->video image calibration
 	kinect.setRegistration(true);
@@ -53,8 +53,8 @@ void ofApp::setup() {
 	grayThreshFar.allocate(kinect.width, kinect.height);
 */
 	nearThreshold = 0;
-	farThreshold = 5000;
-	colorThreshold = farThreshold / 2;
+	farThreshold = 3040;//5000;
+	colorThreshold = 2900;//farThreshold / 2;
 
 	//ofSetFrameRate(60);
 
@@ -77,7 +77,7 @@ void ofApp::setup() {
     dir_rot = ofVec3f(0, -95, 0);
     setLightOri(dir, dir_rot);
 */
-    resolution = 3;
+    resolution = 1;
     grid = true;
 
     //ofSetBackgroundAuto(false);
@@ -135,12 +135,17 @@ void ofApp::setup() {
 		}
 	}
 	*/
+    staticSound.loadSound("static.wav");
+    staticSound.setVolume(0.1f);
+
+
+    staticSound2.loadSound("static2.wav");
+
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-    ofSetWindowTitle(ofToString(nearThreshold) + " Near / " + ofToString(farThreshold) + " Far / " + ofToString(ofGetFrameRate()) + " FPS");
-
+    ofSetWindowTitle(ofToString(nearThreshold) + " Near / " + ofToString(farThreshold) + " Far / " + ofToString(colorThreshold) + " colodThresh " + ofToString(resolution) + " resolution" + ofToString(ofGetFrameRate()) + " FPS") ;
 
 
     ofBackground(0);
@@ -149,57 +154,8 @@ void ofApp::update() {
 
 				kinect.update();
 
-/*
-ofSetColor(0,0,0, 5);
-ofRect(0,0,ofGetWidth(), ofGetHeight());
-
-ofSetColor(0,0,0);
-*/
-	//kinect.update();
 
 
-/*
-	// there is a new frame and we are connected
-	if(kinect.isFrameNew()) {
-
-		// load grayscale depth image from the kinect source
-		grayImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-
-		// we do two thresholds - one for the far plane and one for the near plane
-		// we then do a cvAnd to get the pixels which are a union of the two thresholds
-		if(bThreshWithOpenCV) {
-			grayThreshNear = grayImage;
-			grayThreshFar = grayImage;
-			grayThreshNear.threshold(nearThreshold, true);
-			grayThreshFar.threshold(farThreshold);
-			cvAnd(grayThreshNear.getCvImage(), grayThreshFar.getCvImage(), grayImage.getCvImage(), NULL);
-		} else {
-
-			// or we do it ourselves - show people how they can work with the pixels
-			unsigned char * pix = grayImage.getPixels();
-
-			int numPixels = grayImage.getWidth() * grayImage.getHeight();
-			for(int i = 0; i < numPixels; i++) {
-				if(pix[i] < nearThreshold && pix[i] > farThreshold) {
-					pix[i] = 255;
-				} else {
-					pix[i] = 0;
-				}
-			}
-		}
-
-		// update the cv images
-		grayImage.flagImageChanged();
-
-		// find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
-		// also, find holes is set to true so we will get interior contours as well....
-		contourFinder.findContours(grayImage, 10, (kinect.width*kinect.height)/2, 20, false);
-	}
-
-#ifdef USE_TWO_KINECTS
-	kinect2.update();
-#endif
-*/
 }
 
 //--------------------------------------------------------------
@@ -303,6 +259,10 @@ void ofApp::drawPointCloud() {
         //mesh.clear();
     }
   */
+    int percentCount = 0;
+    int totalRuns = 0;
+    int whichStatic = 1;
+
                 int blend;
 
                 if (frameBlend > 1){
@@ -318,13 +278,14 @@ void ofApp::drawPointCloud() {
 
 
 			if((kinect.getDistanceAt(x, y) > nearThreshold) && (kinect.getDistanceAt(x, y) < farThreshold)) {
-
+                totalRuns++;
+               mesh.setMode(OF_PRIMITIVE_POINTS); //default to points
 
 
                 if (!showColor){
                     if (kinect.getDistanceAt(x,y) > colorThreshold){
 
-
+                        percentCount++;
                         tempC = ofColor((kinect.getColorAt(x,y)));
                         tempC.a = blend;
                         mesh.addColor(tempC);
@@ -332,11 +293,14 @@ void ofApp::drawPointCloud() {
 
                         //mainMesh.setColor(x+y * w, kinect.getColorAt(x,y));
                         mesh.setMode(OF_PRIMITIVE_POINTS);
+                        whichStatic = 1;
                     } else {
-                        mesh.addColor(ofColor(ofRandom(0,220)));
+                        percentCount--;
+                        mesh.addColor(ofColor(ofRandom(0,200)));
 
                         //mainMesh.setColor(x+y * w, ofRandom(0,220));
                         mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+                        whichStatic = 2;
                     }
 
                  } else { //show red version
@@ -357,18 +321,9 @@ void ofApp::drawPointCloud() {
 
 				mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
 
-                //mainMesh.setVertex((x+y * w), kinect.getWorldCoordinateAt(x,y));
-				//path.lineTo(kinect.getWorldCoordinateAt(x,y));
-				//poly.addVertex(kinect.getWorldCoordinateAt(x,y));
-
                 //triangulation.addPoint(kinect.getWorldCoordinateAt(x,y));
-			} else {
 
-                        //otherMesh.addColor(ofColor(255,20,20));//, blend));
-                        //otherMesh.addColor(kinect.getColorAt(x,y));
-				//otherMesh.addVertex(kinect.getWorldCoordinateAt(x, y));
-			}
-
+}
 /*
             if (x < oldMesh.getNumVertices() - 1){
                 float connectionDistance = 30;
@@ -385,6 +340,7 @@ void ofApp::drawPointCloud() {
                     }
             }
 */
+    ////////////////////////////////// BEGIN Z AXIS MOVEMENT //////////////////////////////
         //if these pixels change in depth more than the threshold, record their average movement to adjust the camera
 
         float comp = kinect.getDistanceAt(x,y) - lastCoord[x+y*w];
@@ -398,7 +354,7 @@ void ofApp::drawPointCloud() {
         //cout << lastCoord[x+y*w] << endl;
 
 		}
-	}
+	} //close out the big for loop
 
     int compMin = 2000 / resolution; //number of points needed to even compare them
     compFrameCount++;
@@ -435,10 +391,45 @@ void ofApp::drawPointCloud() {
     //cout<< "transamt is " << transAmt << endl;
         ofTranslate(0, 0, transAmt * 40); // move the camera by the lerped average change in depth above a threshold
 
+    staticSound.setSpeed(ofMap(transAmt, 0, 250,0,2.0));
+    staticSound2.setSpeed(ofMap(transAmt, 0, 250,0,2.0));
+
 
     tempCompAverage = 0;
     compCount = 0;
     //compAverage = 0;
+
+    ////////////////////////////////// END Z AXIS MOVEMENT //////////////////////////////
+
+    //only play the static sound when less than half the screen shows rgb
+    //if (percentCount < 0){
+
+            //cout << "trigger static sound play" << endl;
+        if (whichStatic == 1){
+            if (!staticSound.getIsPlaying()){
+                staticSound.play();
+            }
+            staticSound2.stop();
+        } else {
+            if (!staticSound2.getIsPlaying()){
+                staticSound2.play();
+                //cout << "play soundstatic 2" << endl;
+            }
+                staticSound.stop();
+        }
+/*
+    } else {
+        //staticSound.stop();
+            cout << "trigger static sound stop for " << percentCount << " out of " << totalRuns << endl;
+    }
+*/
+    staticSound.setVolume(ofMap(percentCount, -totalRuns, totalRuns, 0.7,  0));
+    staticSound2.setVolume(ofMap(percentCount, -totalRuns, totalRuns, 0.7,  0));
+
+    percentCount = 0;
+
+    ////////////////////////////////// BEGIN PIXEL INDEX BUILDING //////////////////////////////
+    //if you start this when there are too many pixels, it will freeze
 
     if (collectIndices){
             // Don't forget to change to lines mode!
@@ -468,10 +459,11 @@ void ofApp::drawPointCloud() {
             }
 
             }
+    ////////////////////////////////// END PIXEL INDEX BUILDING //////////////////////////////
 
 
 	//}
-	glPointSize(5);
+	glPointSize(3 * resolution); //larger points when there are less of them
 	ofPushMatrix();
 	// the projected points are 'upside down' and 'backwards'
 	ofScale(1, -1, -1); //flip it back around
@@ -541,6 +533,8 @@ void ofApp::keyPressed (int key) {
 
 		case'p':
 			drawPoint = !drawPoint;
+
+    staticSound.play();
 			break;
 
 		case'g':
@@ -678,12 +672,14 @@ void ofApp::keyPressed (int key) {
 			angle++;
 			if(angle>30) angle=30;
 			kinect.setCameraTiltAngle(angle);
+			cout << "camera angle is " << angle << endl;
 			break;
 
 		case OF_KEY_DOWN:
 			angle--;
 			if(angle<-30) angle=-30;
 			kinect.setCameraTiltAngle(angle);
+			cout << "camera angle is " << angle << endl;
 			break;
 
 		case OF_KEY_LEFT:

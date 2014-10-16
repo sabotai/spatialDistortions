@@ -114,5 +114,8 @@ public:
         float compCount, compFrameCount;
         float compAverage, oldComp;
 
-    float compLerp;
+        float compLerp;
+
+
+		ofSoundPlayer 		staticSound, staticSound2;
 };
