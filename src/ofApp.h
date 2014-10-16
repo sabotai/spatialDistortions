@@ -118,4 +118,9 @@ public:
 
 
 		ofSoundPlayer 		staticSound, staticSound2;
+        ofImage img;
+		//ofImage snowTexture;
+		//unsigned char * pixels;
+
+		float transAmt;
 };

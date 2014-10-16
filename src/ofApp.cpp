@@ -141,6 +141,12 @@ void ofApp::setup() {
 
     staticSound2.loadSound("static2.wav");
 
+   // snowTexture.allocate(ofGetWidth(), ofGetHeight(), OF_IMAGE_GRAYSCALE);
+   // pixels = snowTexture.getPixels();
+
+
+    img.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
+
 }
 
 //--------------------------------------------------------------
@@ -172,12 +178,6 @@ void ofApp::draw() {
     ofScale(scaleAmt, scaleAmt); //resize the screen if switching between fullscreen
     //cout<< scaleAmt << endl;
 
-    if (showSnow){
-        snow();
-    }
-
-
-
     // begin scene to post process
     //ofEnableDepthTest();
     post.begin(easyCam);
@@ -204,14 +204,21 @@ void ofApp::draw() {
 
 
 
-
-
     glPopAttrib();    // set gl state back to original
 
 
 
 
-    ofDrawBitmapString(ofToString(easyCam.getDrag()), 20, 652);
+    if (showSnow){
+    glEnable(GL_DEPTH);
+        snow();
+    }
+
+
+
+
+
+    //ofDrawBitmapString(ofToString(easyCam.getDrag()), 20, 652);
     //oldTv.end();
     //oldTv.update();
     //oldTv.draw();
@@ -365,7 +372,7 @@ void ofApp::drawPointCloud() {
         tempCompAverage = 0;
     }
 
-    float transAmt = 0;
+    transAmt = 0;
 
     if (compFrameCount < ofGetFrameRate()/2){ //every half second
         compAverage += tempCompAverage;
@@ -379,7 +386,7 @@ void ofApp::drawPointCloud() {
         //compLerp = lerpedComp+1;
         transAmt = oldComp;
 
-        cout<< "compAvg is " << compAverage << "  and oldComp is " << oldComp <<  " and lerped is " << compLerp << endl;
+        //cout<< "compAvg is " << compAverage << "  and oldComp is " << oldComp <<  " and lerped is " << compLerp << endl;
         //compAverage = oldComp;
         //compAverage *= 100; //multiplier for distance changes
         if (compAverage >= -10000000){
@@ -486,6 +493,22 @@ void ofApp::drawPointCloud() {
 
 
 void ofApp::snow(){
+
+
+
+for (int i = 0; i < img.getPixelsRef().size(); i+=4){
+
+        int rando = ofRandom(0,255);
+        img.getPixelsRef()[i] = rando;//ofColor(rando, rando, rando, 100) ; // make some op-art
+        img.getPixelsRef()[i+1] = rando;
+        img.getPixelsRef()[i+2] = rando;
+        img.getPixelsRef()[i+3] = ofMap(transAmt, 200, 500, 255, 200); //alpha
+
+    }
+img.reloadTexture();
+img.draw(0,0,0, ofGetWidth(), ofGetHeight());
+
+/*
 	//threadedObject.draw();
 
     int noisePixel = 5;
@@ -505,10 +528,16 @@ void ofApp::snow(){
         ofLine(xx*noisePixel, yy*noisePixel, xx*noisePixel+noisePixel, yy*noisePixel+ofRandom(0,noisePixel));
         //otherMesh.addColor(ofColor(ofRandom(0,255)));
         //otherMesh.addVertex(ofPoint(xx,yy));
+
+
+        pixels[xx + yy * 640] = ofRandom(0,255);
+        snowTexture = pixels;
+        snowTexture.reloadTexture();
+
       }
     }
 
-
+*/
 
 }
 //--------------------------------------------------------------
