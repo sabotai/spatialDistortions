@@ -310,65 +310,6 @@ obj/linux64/Debug/src/main.o: src/main.cpp src/ofApp.h \
  ../../../libs/openFrameworks/video/ofGstVideoPlayer.h \
  ../../../libs/openFrameworks/3d/ofCamera.h \
  ../../../libs/openFrameworks/3d/ofEasyCam.h \
- ../../../addons/ofxOpenCv/src/ofxOpenCv.h \
- ../../../addons/ofxOpenCv/src/ofxCvConstants.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv/cv.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/core_c.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/types_c.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/core.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/version.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/operations.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/mat.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc/imgproc_c.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc/types_c.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc/imgproc.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/tracking.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/features2d/features2d.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/miniflann.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/defines.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/config.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/flann.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/flann_base.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/general.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/defines.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/matrix.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/params.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/any.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/saving.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/nn_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/result_set.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/all_indices.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/kdtree_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/dynamic_bitset.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/dist.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/heap.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/allocator.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/random.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/kdtree_single_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/kmeans_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/logger.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/composite_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/linear_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/hierarchical_clustering_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/lsh_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/lsh_table.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/autotuned_index.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/ground_truth.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/index_testing.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/timer.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/sampling.h \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/calib3d/calib3d.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/objdetect/objdetect.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/legacy/compat.hpp \
- ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/internal.hpp \
- ../../../addons/ofxOpenCv/src/ofxCvImage.h \
- ../../../addons/ofxOpenCv/src/ofxCvGrayscaleImage.h \
- ../../../addons/ofxOpenCv/src/ofxCvBlob.h \
- ../../../addons/ofxOpenCv/src/ofxCvColorImage.h \
- ../../../addons/ofxOpenCv/src/ofxCvFloatImage.h \
- ../../../addons/ofxOpenCv/src/ofxCvShortImage.h \
- ../../../addons/ofxOpenCv/src/ofxCvContourFinder.h \
- ../../../addons/ofxOpenCv/src/ofxCvHaarFinder.h \
  ../../../addons/ofxKinect/src/ofxKinect.h \
  ../../../addons/ofxKinect/libs/libfreenect/include/libfreenect.h \
  /usr/include/libusb-1.0/libusb.h \
@@ -398,9 +339,6 @@ obj/linux64/Debug/src/main.o: src/main.cpp src/ofApp.h \
  ../../../addons/ofxPostProcessing/src/GodRaysPass.h \
  ../../../addons/ofxPostProcessing/src/RimHighlightingPass.h \
  ../../../addons/ofxPostProcessing/src/LimbDarkeningPass.h \
- ../../../addons/ofxFX/src/filters/ofxOldTv.h \
- ../../../addons/ofxFX/src/ofxFXObject.h \
- ../../../addons/ofxFX/src/ofxSwapBuffer.h \
  ../../../addons/ofxDelaunay/src/ofxDelaunay.h \
  ../../../addons/ofxDelaunay/libs/Delaunay/Delaunay.h \
  src/threadedObject.h
@@ -1061,124 +999,6 @@ src/ofApp.h:
 
 ../../../libs/openFrameworks/3d/ofEasyCam.h:
 
-../../../addons/ofxOpenCv/src/ofxOpenCv.h:
-
-../../../addons/ofxOpenCv/src/ofxCvConstants.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv/cv.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/core_c.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/types_c.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/core.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/version.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/operations.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/mat.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc/imgproc_c.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc/types_c.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/imgproc/imgproc.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/video/tracking.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/features2d/features2d.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/miniflann.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/defines.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/config.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/flann.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/flann_base.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/general.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/defines.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/matrix.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/params.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/any.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/saving.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/nn_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/result_set.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/all_indices.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/kdtree_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/dynamic_bitset.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/dist.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/heap.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/allocator.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/random.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/kdtree_single_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/kmeans_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/logger.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/composite_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/linear_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/hierarchical_clustering_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/lsh_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/lsh_table.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/autotuned_index.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/ground_truth.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/index_testing.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/timer.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/flann/sampling.h:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/calib3d/calib3d.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/objdetect/objdetect.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/legacy/compat.hpp:
-
-../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/internal.hpp:
-
-../../../addons/ofxOpenCv/src/ofxCvImage.h:
-
-../../../addons/ofxOpenCv/src/ofxCvGrayscaleImage.h:
-
-../../../addons/ofxOpenCv/src/ofxCvBlob.h:
-
-../../../addons/ofxOpenCv/src/ofxCvColorImage.h:
-
-../../../addons/ofxOpenCv/src/ofxCvFloatImage.h:
-
-../../../addons/ofxOpenCv/src/ofxCvShortImage.h:
-
-../../../addons/ofxOpenCv/src/ofxCvContourFinder.h:
-
-../../../addons/ofxOpenCv/src/ofxCvHaarFinder.h:
-
 ../../../addons/ofxKinect/src/ofxKinect.h:
 
 ../../../addons/ofxKinect/libs/libfreenect/include/libfreenect.h:
@@ -1236,12 +1056,6 @@ src/ofApp.h:
 ../../../addons/ofxPostProcessing/src/RimHighlightingPass.h:
 
 ../../../addons/ofxPostProcessing/src/LimbDarkeningPass.h:
-
-../../../addons/ofxFX/src/filters/ofxOldTv.h:
-
-../../../addons/ofxFX/src/ofxFXObject.h:
-
-../../../addons/ofxFX/src/ofxSwapBuffer.h:
 
 ../../../addons/ofxDelaunay/src/ofxDelaunay.h:
 

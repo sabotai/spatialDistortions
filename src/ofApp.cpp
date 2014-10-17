@@ -42,107 +42,36 @@ void ofApp::setup() {
 		ofLogNotice() << "zero plane dist: " << kinect.getZeroPlaneDistance() << "mm";
 	}
 
-#ifdef USE_TWO_KINECTS
-	kinect2.init();
-	kinect2.open();
-#endif
-/*
-	colorImg.allocate(kinect.width, kinect.height);
-	grayImage.allocate(kinect.width, kinect.height);
-	grayThreshNear.allocate(kinect.width, kinect.height);
-	grayThreshFar.allocate(kinect.width, kinect.height);
-*/
 	nearThreshold = 0;
-	farThreshold = 3040;//5000;
-	colorThreshold = 2900;//farThreshold / 2;
+	farThreshold = 2900;//5000;
+	colorThreshold = 2500;//farThreshold / 2;
 
-	//ofSetFrameRate(60);
+	ofSetFrameRate(60);
 
-	// zero the tilt on startup
-	angle = 0;
+	// set the tilt on startup
+	angle = 14;
 	kinect.setCameraTiltAngle(angle);
-
-
-    //ofEnableAlphaBlending();
-    //ofEnableSmoothing();
 
 	jump = 20;
 
-	//oldTv.allocate(1920,1080);
-/*
-    dir.setDiffuseColor(ofColor(0.0f, 0.0f, 255.0f));
-    dir.setSpecularColor(ofColor(255.0f, 0.0f, 0.0f));
-
-    dir.setDirectional();
-    dir_rot = ofVec3f(0, -95, 0);
-    setLightOri(dir, dir_rot);
-*/
     resolution = 1;
     grid = true;
 
-    //ofSetBackgroundAuto(false);
-    scaleAmt = 1.0;
+    scaleAmt = 1.0; //default scale to 1, used later for fullscreen
 
 
 	//threadedObject.start();
 
-
-
-	//store the kinect width and height for convenience
-	int width = 640;
-	int height = 480;
 
     frameBlend = 1;
 
     oldComp = 0;
     compAverage = 0;
 
-
-	//add one vertex to the mesh for each pixel
-	for (int y = 0; y < height; y++){
-		for (int x = 0; x<width; x++){
-			mainMesh.addVertex(ofPoint(x,y,0));	// mesh index = x + y*width
-												// this replicates the pixel array within the camera bitmap...
-			mainMesh.addColor(ofFloatColor(0,0,0));  // placeholder for colour data, we'll get this from the camera
-		}
-	}
-/*
-    float connectionDistance = 100;
-    int numVerts = mainMesh.getNumVertices();
-    for (int a=0; a<numVerts; ++a) {
-        ofVec3f verta = mainMesh.getVertex(a);
-        for (int b=a+1; b<numVerts; ++b) {
-            ofVec3f vertb = mainMesh.getVertex(b);
-            float distance = verta.distance(vertb);
-            if (distance <= connectionDistance) {
-                mainMesh.addIndex(a);
-                mainMesh.addIndex(b);
-            }
-        }
-    }
-    */
-    //cout << "clear" << endl;
-/*
-	for (int y = 0; y<height-1; y++){
-		for (int x=0; x<width-1; x++){
-			mainMesh.addIndex(x+y*width);				// 0
-			mainMesh.addIndex((x+1)+y*width);			// 1
-			mainMesh.addIndex(x+(y+1)*width);			// 10
-
-			mainMesh.addIndex((x+1)+y*width);			// 1
-			mainMesh.addIndex((x+1)+(y+1)*width);		// 11
-			mainMesh.addIndex(x+(y+1)*width);			// 10
-		}
-	}
-	*/
     staticSound.loadSound("static.wav");
     staticSound.setVolume(0.1f);
-
-
     staticSound2.loadSound("static2.wav");
-
-   // snowTexture.allocate(ofGetWidth(), ofGetHeight(), OF_IMAGE_GRAYSCALE);
-   // pixels = snowTexture.getPixels();
+    staticSound2.setVolume(0.1f);
 
 
     img.allocate(640, 480, OF_IMAGE_COLOR_ALPHA);
@@ -155,10 +84,7 @@ void ofApp::update() {
 
 
     ofBackground(0);
-
-
-
-				kinect.update();
+    kinect.update();
 
 
 
@@ -196,8 +122,6 @@ void ofApp::draw() {
 
     drawPointCloud();
 
-
-    ofNoFill();
     //triangulation.draw(); //draw those random floating triangulations
 
     post.end();    // end scene and draw
@@ -210,38 +134,12 @@ void ofApp::draw() {
 
 
     if (showSnow){
-    glEnable(GL_DEPTH);
+        glEnable(GL_DEPTH);
         snow();
     }
 
-
-
-
-
-    //ofDrawBitmapString(ofToString(easyCam.getDrag()), 20, 652);
-    //oldTv.end();
-    //oldTv.update();
-    //oldTv.draw();
-
 }
 
-void ofApp::drawPointCloudAlt(){
-/*
-	int w = 640;
-	int h = 480;
-
-		for (int i=0; i< w * h; i++){
-
-			//now we get the vertex aat this position
-			//we extrude the mesh based on it's brightness
-			ofVec3f tmpVec = mainMesh.getVertex(i);
-			tmpVec.z = sampleColor.getBrightness() * extrusionAmount;
-			mainMesh.setVertex(i, tmpVec);
-
-			mainMesh.setColor(i, sampleColor);
-		}
-*/
-}
 
 void ofApp::drawPointCloud() {
 	int w = 640;
@@ -249,36 +147,28 @@ void ofApp::drawPointCloud() {
 
 	float tempCompAverage;
 
-
-    //ofMesh oldMesh;
-    //oldMesh = mesh;
     ofMesh mesh;
 
-    //mesh.clear();
-    //mainMesh.clearVertices();
 
 
 	ofSetLineWidth(3);
 
-/*
-	if (ofGetFrameNum()%frameBlend ==0){
 
-        //mesh.clear();
-    }
-  */
     int percentCount = 0;
     int totalRuns = 0;
     int whichStatic = 1;
 
-                int blend;
+    int blend;
 
-                if (frameBlend > 1){
-                    blend = 255  / (frameBlend / ofGetFrameRate());
-                    blend = ofClamp(blend, 0, 255);
-                    //cout << blend << endl;
-                } else {
-                    blend = 255;
-                }
+    if (frameBlend > 1){
+        blend = 255  / (frameBlend / ofGetFrameRate());
+        blend = ofClamp(blend, 0, 255);
+        //cout << blend << endl;
+    } else {
+        blend = 255;
+    }
+
+
 
 	for(int y = 0; y < h; y += resolution) {
 		for(int x = 0; x < w; x += resolution) {
@@ -294,7 +184,7 @@ void ofApp::drawPointCloud() {
 
                         percentCount++;
                         tempC = ofColor((kinect.getColorAt(x,y)));
-                        tempC.a = blend;
+                        //tempC.a = blend;
                         mesh.addColor(tempC);
                         //mesh.addColor(kinect.getColorAt(x,y));
 
@@ -320,10 +210,13 @@ void ofApp::drawPointCloud() {
 
                         //mainMesh.setColor(x+y * w, ofColor(255,20,20));
                 }
-                if (drawPoint){
-                        //mesh.setMode(OF_PRIMITIVE_POINTS);
-                } else {
-                        //mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+
+                if (defineMeshMode){ //change between glitchy auto mode and user defined mesh mode
+                    if (drawPoint){
+                            mesh.setMode(OF_PRIMITIVE_POINTS);
+                    } else {
+                            mesh.setMode(OF_PRIMITIVE_LINE_STRIP);
+                    }
                 }
 
 				mesh.addVertex(kinect.getWorldCoordinateAt(x, y));
@@ -331,32 +224,15 @@ void ofApp::drawPointCloud() {
                 //triangulation.addPoint(kinect.getWorldCoordinateAt(x,y));
 
 }
-/*
-            if (x < oldMesh.getNumVertices() - 1){
-                float connectionDistance = 30;
 
-                int a = x;
-                int b = x+1;
-
-                ofVec3f verta = oldMesh.getVertex(a);
-                ofVec3f vertb = oldMesh.getVertex(b);
-                float distance = verta.distance(vertb);
-                if (distance <= connectionDistance) {
-                    oldMesh.addIndex(a);
-                    oldMesh.addIndex(b);
-                    }
-            }
-*/
-    ////////////////////////////////// BEGIN Z AXIS MOVEMENT //////////////////////////////
+    ////////////////////////////////// BEGIN Z AXIS SHIFT //////////////////////////////
         //if these pixels change in depth more than the threshold, record their average movement to adjust the camera
 
         float comp = kinect.getDistanceAt(x,y) - lastCoord[x+y*w];
         int compThresh = 100 / resolution;
 
-        //if (comp > compThresh){
-            tempCompAverage += comp;
-            compCount +=1;
-        //}
+        tempCompAverage += comp;
+        compCount +=1;
         lastCoord[x+y*w] = kinect.getDistanceAt(x, y);
         //cout << lastCoord[x+y*w] << endl;
 
@@ -381,26 +257,24 @@ void ofApp::drawPointCloud() {
     } else {
         compAverage /= compFrameCount;
 
-        //compLerp = ofLerp(compLerp, compAverage + oldComp, 0.5);
-        //float lerpedComp = ofLerp(oldComp, compAverage, 0.5);
-        //compLerp = lerpedComp+1;
         transAmt = oldComp;
 
         //cout<< "compAvg is " << compAverage << "  and oldComp is " << oldComp <<  " and lerped is " << compLerp << endl;
         //compAverage = oldComp;
         //compAverage *= 100; //multiplier for distance changes
-        if (compAverage >= -10000000){
+        if (compAverage >= -10000000){ //this prevents nan
             oldComp += compAverage;}
         compAverage = 0;
         compFrameCount = 0;
     }
 
     //cout<< "transamt is " << transAmt << endl;
-        ofTranslate(0, 0, transAmt * 40); // move the camera by the lerped average change in depth above a threshold
+    ofTranslate(0, 0, transAmt * 40); // move the camera by the lerped average change in depth above a threshold
 
-    staticSound.setSpeed(ofMap(transAmt, 0, 250,0,2.0));
-    staticSound2.setSpeed(ofMap(transAmt, 0, 250,0,2.0));
-
+    if (transAmt > -1000000 && transAmt != 0){
+        staticSound.setSpeed(ofMap(transAmt, 0, 250,0,2.0));
+        staticSound2.setSpeed(ofMap(transAmt, 0, 250,0,2.0));
+    }
 
     tempCompAverage = 0;
     compCount = 0;
@@ -411,29 +285,29 @@ void ofApp::drawPointCloud() {
     //only play the static sound when less than half the screen shows rgb
     //if (percentCount < 0){
 
-            //cout << "trigger static sound play" << endl;
+
+    // change the sound sample... originally, i was using the same soundplayer object and loading the other file, but this is super slow
         if (whichStatic == 1){
             if (!staticSound.getIsPlaying()){
                 staticSound.play();
             }
-            staticSound2.stop();
+
+            if (staticSound2.getIsPlaying()){
+                staticSound2.stop();}
+
         } else {
             if (!staticSound2.getIsPlaying()){
                 staticSound2.play();
-                //cout << "play soundstatic 2" << endl;
             }
-                staticSound.stop();
-        }
-/*
-    } else {
-        //staticSound.stop();
-            cout << "trigger static sound stop for " << percentCount << " out of " << totalRuns << endl;
-    }
-*/
-    staticSound.setVolume(ofMap(percentCount, -totalRuns, totalRuns, 0.7,  0));
-    staticSound2.setVolume(ofMap(percentCount, -totalRuns, totalRuns, 0.7,  0));
 
-    percentCount = 0;
+            if (staticSound.getIsPlaying()){
+                staticSound.stop();}
+        }
+    if (percentCount != 0){
+    staticSound.setVolume(ofMap(percentCount, -totalRuns, totalRuns, 0.7f,  0.0f));
+    staticSound2.setVolume(ofMap(percentCount, -totalRuns, totalRuns, 0.7f,  0.0f));
+    }
+    percentCount = 0; //reset for the next loop
 
     ////////////////////////////////// BEGIN PIXEL INDEX BUILDING //////////////////////////////
     //if you start this when there are too many pixels, it will freeze
@@ -465,79 +339,34 @@ void ofApp::drawPointCloud() {
 
             }
 
-            }
+    }
     ////////////////////////////////// END PIXEL INDEX BUILDING //////////////////////////////
 
 
-	//}
+
 	glPointSize(3 * resolution); //larger points when there are less of them
 	ofPushMatrix();
-	// the projected points are 'upside down' and 'backwards'
-	ofScale(1, -1, -1); //flip it back around
-
-
-
-	//    otherMesh.drawVertices();
-	ofTranslate(0, 0, -1800); // center the points a bit
-    //mainMesh.drawFaces();
-    //mesh.drawVertices();
-    mesh.draw();
-
-
-
-    otherMesh.setMode(OF_PRIMITIVE_POINTS);
-    //otherMesh.draw();
-    //oldMesh.drawFaces();
+        // the projected points are 'upside down' and 'backwards'
+        ofScale(1, -1, -1); //flip it back around
+        ofTranslate(0, 0, -1800); // center the points a bit
+        mesh.draw();
 	ofPopMatrix();
 }
 
 
 void ofApp::snow(){
 
+    for (int i = 0; i < img.getPixelsRef().size(); i+=4){
 
+            int rando = ofRandom(0,255);
+            img.getPixelsRef()[i] = rando;//ofColor(rando, rando, rando, 100) ; // make some op-art
+            img.getPixelsRef()[i+1] = rando;
+            img.getPixelsRef()[i+2] = rando;
+            img.getPixelsRef()[i+3] = ofMap(transAmt, 200, 500, 255, 200); //alpha
 
-for (int i = 0; i < img.getPixelsRef().size(); i+=4){
-
-        int rando = ofRandom(0,255);
-        img.getPixelsRef()[i] = rando;//ofColor(rando, rando, rando, 100) ; // make some op-art
-        img.getPixelsRef()[i+1] = rando;
-        img.getPixelsRef()[i+2] = rando;
-        img.getPixelsRef()[i+3] = ofMap(transAmt, 200, 500, 255, 200); //alpha
-
-    }
-img.reloadTexture();
-img.draw(0,0,0, ofGetWidth(), ofGetHeight());
-
-/*
-	//threadedObject.draw();
-
-    int noisePixel = 5;
-    //ofLine(0,0,500,500);
-
-    for (int yy = 0; yy < ofGetHeight() / noisePixel; yy++) {
-      for (int xx = 0; xx < ofGetWidth() / noisePixel; xx++) {
-        //float noiseScale = 5 * ofGetFrameNum();
-
-        //float noiseVal = ofNoise(ofRandom(0,ofGetWidth())*noiseScale, ofRandom(0,ofGetHeight())*noiseScale);
-        //ofSetColor(noiseVal*255);
-
-        int alphaAmt = 200;
-        ofSetColor(ofRandom(0,255), ofRandom(alphaAmt, 255));
-
-        ofSetLineWidth(noisePixel);
-        ofLine(xx*noisePixel, yy*noisePixel, xx*noisePixel+noisePixel, yy*noisePixel+ofRandom(0,noisePixel));
-        //otherMesh.addColor(ofColor(ofRandom(0,255)));
-        //otherMesh.addVertex(ofPoint(xx,yy));
-
-
-        pixels[xx + yy * 640] = ofRandom(0,255);
-        snowTexture = pixels;
-        snowTexture.reloadTexture();
-
-      }
-    }
-
-*/
+        }
+    img.reloadTexture();
+    img.draw(0,0,0, ofGetWidth(), ofGetHeight());
 
 }
 //--------------------------------------------------------------
@@ -545,9 +374,6 @@ void ofApp::exit() {
 	//kinect.setCameraTiltAngle(0); // zero the tilt on exit
 	kinect.close();
 
-#ifdef USE_TWO_KINECTS
-	kinect2.close();
-#endif
 }
 
 //--------------------------------------------------------------
@@ -563,7 +389,7 @@ void ofApp::keyPressed (int key) {
 		case'p':
 			drawPoint = !drawPoint;
 
-    staticSound.play();
+            staticSound.play();
 			break;
 
 		case'g':
@@ -620,8 +446,9 @@ void ofApp::keyPressed (int key) {
 			break;
 */
 		case 'o':
-			kinect.setCameraTiltAngle(angle); // go back to prev tilt
-			kinect.open();
+			//kinect.setCameraTiltAngle(angle); // go back to prev tilt
+			//kinect.open();
+			defineMeshMode = !defineMeshMode;
 			break;
 
 		case 'c':
